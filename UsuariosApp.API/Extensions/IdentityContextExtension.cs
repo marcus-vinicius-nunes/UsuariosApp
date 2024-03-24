@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using UsuariosApp.API.Identity.Contexts;
 using UsuariosApp.API.Identity.Entities;
+using UsuariosApp.API.Settings;
 
 namespace UsuariosApp.API.Extensions
 {
@@ -14,6 +16,14 @@ namespace UsuariosApp.API.Extensions
         public static IServiceCollection AddIdentityContext
             (this IServiceCollection services, IConfiguration configuration)
         {
+            //configurando os parametros do /appsetings
+            var identitySettings = new IdentitySettings();
+            new ConfigureFromConfigurationOptions<IdentitySettings>
+                (configuration.GetSection("IdentitySettings"))
+                .Configure(identitySettings);
+
+            services.AddSingleton(identitySettings);
+
             //injeção de dependência para o contexto
             services.AddDbContext<IdentityContext>
                 (options => options.UseNpgsql(configuration.GetConnectionString("BDUsuariosApp")));
